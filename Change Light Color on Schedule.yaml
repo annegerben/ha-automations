@@ -1,0 +1,62 @@
+blueprint:
+  name: Change Light Color on Schedule
+  description: Change the color of a light at specific times on specific days of the week.
+  domain: automation
+  input:
+    light_entity:
+      name: Light
+      description: The light entity to control
+      selector:
+        entity:
+          domain: light
+    color_times:
+      name: Color Times
+      description: List of times and colors
+      default:
+        - time: "08:00:00"
+          color: [255, 0, 0]  # Red
+        - time: "12:00:00"
+          color: [0, 255, 0]  # Green
+        - time: "18:00:00"
+          color: [0, 0, 255]  # Blue
+      selector:
+        object:
+          multiple: true
+          properties:
+            time:
+              selector:
+                time:
+            color:
+              selector:
+                color_rgb:
+    weekdays:
+      name: Weekdays
+      description: Days of the week to run the automation
+      default: ["mon", "tue", "wed", "thu", "fri"]
+      selector:
+        select:
+          multiple: true
+          options:
+            - mon
+            - tue
+            - wed
+            - thu
+            - fri
+            - sat
+            - sun
+
+trigger:
+  - platform: time
+    at: !input color_times
+
+condition:
+  - condition: template
+    value_template: >
+      {{ now().strftime('%a').lower() in !input weekdays }}
+
+action:
+  - service: light.turn_on
+    target:
+      entity_id: !input light_entity
+    data:
+      rgb_color: "{{ trigger.event.data.color }}"
