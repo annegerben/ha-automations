@@ -47,7 +47,7 @@ blueprint:
 
 trigger:
   - platform: time
-    at: !input color_times
+    at: !input color_times.time
 
 condition:
   - condition: template
@@ -59,4 +59,4 @@ action:
     target:
       entity_id: !input light_entity
     data:
-      rgb_color: "{{ trigger.event.data.color }}"
+      rgb_color: "{{ !input color_times.color }}"
